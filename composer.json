@@ -1,0 +1,23 @@
+{
+    "name": "bluetea/push-notifications",
+    "description": "BlueTea Push Notifications PHP Library",
+    "keywords": ["mobile","push","notifications"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bert Hausmans",
+            "email": "b.hausmans@bluetea.nl",
+            "homepage": "http://www.bluetea.nl",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bluetea\\": "src/"
+        }
+    }
+}
