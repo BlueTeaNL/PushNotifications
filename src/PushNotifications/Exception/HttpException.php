@@ -1,6 +1,6 @@
 <?php
 
-namespace PushNotifications\Exception;
+namespace Bluetea\PushNotifications\Exception;
 
 class HttpException extends ApiException
 {

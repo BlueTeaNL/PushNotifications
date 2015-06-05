@@ -1,6 +1,6 @@
 <?php
 
-namespace PushNotifications\Authentication;
+namespace Bluetea\PushNotifications\Authentication;
 
 interface AuthenticationInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace PushNotifications\Model;
+namespace Bluetea\PushNotifications\Model;
 
 interface MessageInterface
 {
@@ -33,4 +33,14 @@ interface MessageInterface
      * @return string
      */
     public function getContent();
+
+    /**
+     * Set custom options
+     */
+    public function setOptions($options);
+
+    /**
+     * @return array
+     */
+    public function getOptions();
 }

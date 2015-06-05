@@ -1,11 +1,9 @@
 <?php
 
-namespace PushNotifications\Model;
+namespace Bluetea\PushNotifications\Model;
 
 class Message implements MessageInterface
 {
-
-
     /**
      * @var string
      */
@@ -15,6 +13,11 @@ class Message implements MessageInterface
      * @var string
      */
     protected $_content;
+
+    /**
+     * @var array
+     */
+    protected $_options;
 
     /**
      * Sets the message title
@@ -56,5 +59,25 @@ class Message implements MessageInterface
     public function getContent()
     {
         return $this->_content;
+    }
+
+    /**
+     * Set custom options
+     *
+     * @param $options
+     */
+    public function setOptions($options)
+    {
+        $this->_options = $options;
+    }
+
+    /**
+     * Get the message options.
+     *
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->_options;
     }
 }

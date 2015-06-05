@@ -1,9 +1,9 @@
 <?php
 
-namespace PushNotifications\Client;
+namespace Bluetea\PushNotifications\Client;
 
-use PushNotifications\Authentication\AuthenticationInterface;
-use PushNotifications\Request\HttpMethod;
+use Bluetea\PushNotifications\Authentication\AuthenticationInterface;
+use Bluetea\PushNotifications\Request\HttpMethod;
 
 abstract class BaseClient
 {

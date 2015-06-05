@@ -1,6 +1,6 @@
 <?php
 
-namespace PushNotifications\Request;
+namespace Bluetea\PushNotifications\Request;
 
 class StatusCodes
 {

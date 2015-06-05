@@ -1,14 +1,14 @@
 <?php
 
-namespace PushNotifications\Client;
+namespace Bluetea\PushNotifications\Client;
 
 use GuzzleHttp\Stream\Stream;
-use PushNotifications\Authentication\BasicAuthentication;
-use PushNotifications\Exception\ApiException;
-use PushNotifications\Exception\HttpNotFoundException;
-use PushNotifications\Exception\UnauthorizedException;
-use PushNotifications\Request\HttpMethod;
-use PushNotifications\Request\StatusCodes;
+use Bluetea\PushNotifications\Authentication\BasicAuthentication;
+use Bluetea\PushNotifications\Exception\ApiException;
+use Bluetea\PushNotifications\Exception\HttpNotFoundException;
+use Bluetea\PushNotifications\Exception\UnauthorizedException;
+use Bluetea\PushNotifications\Request\HttpMethod;
+use Bluetea\PushNotifications\Request\StatusCodes;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
@@ -18,6 +18,11 @@ class GuzzleClient extends BaseClient implements ClientInterface
      * @var Client
      */
     protected $httpClient;
+
+    /**
+     * @var string
+     */
+    protected $cookiefile;
 
     /**
      * @var string
@@ -35,33 +40,49 @@ class GuzzleClient extends BaseClient implements ClientInterface
     protected $json;
 
     /**
+     * @var string
+     */
+    protected $formParams;
+
+    /**
      * Call the API with an endpoint
      *
      * @param $endpoint
      * @param array $endpointParameters
+     * @param array $headers
      * @param null $body
+     * @param array $json
+     * @param string $formParams
      * @param string $method
      *
      * @return array
      * @throws HttpNotFoundException
      * @throws UnauthorizedException
      */
-    public function callEndpoint($endpoint, array $endpointParameters = [], $body = null, $json = [], $method = HttpMethod::REQUEST_GET)
+    public function callEndpoint($endpoint, array $endpointParameters = [], array $headers = [], $body = null, array $json = [], $formParams = null, $method = HttpMethod::REQUEST_GET)
     {
-        // Set the endpoint
-        $this->setEndpoint($endpoint);
-        // Set the parameters
-        $this->setEndpointParameters($endpointParameters);
-        // Set the body
-        $this->setBody($body);
-        // Set the json
-        $this->setJson($json);
-        // Set the HTTP method
-        $this->setHttpMethod($method);
-        // Call the endpoint
-        $this->call();
-        // return the result
-        return $this->getResult();
+        try {
+            // Set the endpoint
+            $this->setEndpoint($endpoint);
+            // Set the parameters
+            $this->setEndpointParameters($endpointParameters);
+            // Set the headers
+            $this->setHeaders($headers);
+            // Set form params
+            $this->setFormParams($formParams);
+            // Set the body
+            $this->setBody($body);
+            // Set the json
+            $this->setJson($json);
+            // Set the HTTP method
+            $this->setHttpMethod($method);
+            // Call the endpoint
+            $this->call();
+            // return the result
+            return $this->getResult();
+        } catch (ClientException $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -92,6 +113,15 @@ class GuzzleClient extends BaseClient implements ClientInterface
             $defaults['verify'] = $this->getCrtBundleFile();
         }
 
+        // Set cookiefile for sessiondata
+        if (!empty($this->cookiefile)) {
+            $defaults['config'] = array(
+                'curl' => array(
+                    CURLOPT_COOKIEJAR => $this->getCookiefile()
+                )
+            );
+        }
+
         $httpClient = new Client(array(
             'base_url' => $this->getBaseUrl(), 'defaults' => $defaults
         ));
@@ -102,9 +132,9 @@ class GuzzleClient extends BaseClient implements ClientInterface
     /**
      * Call the API endpoint
      *
-     * @throws \PushNotifications\Exception\UnauthorizedException
-     * @throws \PushNotifications\Exception\HttpNotFoundException
-     * @throws \PushNotifications\Exception\HttpException
+     * @throws \Bluetea\PushNotifications\Exception\UnauthorizedException
+     * @throws \Bluetea\PushNotifications\Exception\HttpNotFoundException
+     * @throws \Bluetea\PushNotifications\Exception\HttpException
      */
     protected function call()
     {
@@ -126,14 +156,20 @@ class GuzzleClient extends BaseClient implements ClientInterface
         // Set json
         if (($json = $this->getJson()) !== null) {
             $options['json'] = $json;
+            $this->setAccept('application/json');
+        }
+
+        if (($formParams = $this->getFormParams()) !== null) {
+            $options['body'] = $formParams;
+            $this->setContentType('application/x-www-form-urlencoded');
         }
 
         $request = $this->getHttpClient()->createRequest(
             $this->getHttpMethod(),
             $this->getEndpoint(),
             array_merge(
-                $options,
-                array('headers' => $this->getHeaders())
+                array('headers' => $this->getHeaders()),
+                $options
             )
         );
 
@@ -141,7 +177,7 @@ class GuzzleClient extends BaseClient implements ClientInterface
             $request->getQuery()->set($key, $value);
         }
 
-        if (($body = $this->getBody()) !== null) {
+        if (($body = $this->getBody()) !== null && (is_null($body))) {
             $request->setBody(Stream::factory($body));
         }
 
@@ -202,6 +238,22 @@ class GuzzleClient extends BaseClient implements ClientInterface
     }
 
     /**
+     * @param string $cookiefile
+     */
+    public function setCookiefile($cookiefile)
+    {
+        $this->cookiefile = $cookiefile;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCookiefile()
+    {
+        return $this->cookiefile;
+    }
+
+    /**
      * @return int
      */
     public function getResultHttpCode()
@@ -244,5 +296,21 @@ class GuzzleClient extends BaseClient implements ClientInterface
     public function setJson($json)
     {
         $this->json = $json;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormParams()
+    {
+        return $this->formParams;
+    }
+
+    /**
+     * @param string $formParams
+     */
+    public function setFormParams($formParams)
+    {
+        $this->formParams = $formParams;
     }
 }
