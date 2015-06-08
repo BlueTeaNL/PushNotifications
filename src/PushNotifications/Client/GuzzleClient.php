@@ -154,12 +154,12 @@ class GuzzleClient extends BaseClient implements ClientInterface
         }
 
         // Set json
-        if (($json = $this->getJson()) !== null) {
+        if (($json = $this->getJson()) != null) {
             $options['json'] = $json;
             $this->setAccept('application/json');
         }
 
-        if (($formParams = $this->getFormParams()) !== null) {
+        if (($formParams = $this->getFormParams()) != null) {
             $options['body'] = $formParams;
             $this->setContentType('application/x-www-form-urlencoded');
         }
@@ -177,9 +177,10 @@ class GuzzleClient extends BaseClient implements ClientInterface
             $request->getQuery()->set($key, $value);
         }
 
-        if (($body = $this->getBody()) !== null && (is_null($body))) {
+        if (($body = $this->getBody()) != null && (is_null($body))) {
             $request->setBody(Stream::factory($body));
         }
+
 
         try {
             $response = $this->getHttpClient()->send($request);

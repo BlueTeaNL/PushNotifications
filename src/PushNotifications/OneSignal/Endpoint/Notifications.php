@@ -30,10 +30,17 @@ class Notifications extends BaseEndpoint implements EndpointInterface
             }
         }
 
+        if (empty(strip_tags($message->getTitle()))) {
+            $message->setTitle('-');
+        }
+        if (empty(strip_tags($message->getContent()))) {
+            $message->setContent('-');
+        }
+
         $json = array_merge([
             'app_id' => $this->appId,
-            'headings' => ['en' => $message->getTitle()],
-            'contents' => ['en' => $message->getContent()],
+            'headings' => ['en' => strip_tags($message->getTitle())],
+            'contents' => ['en' => strip_tags($message->getContent())],
         ], $config);
 
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
