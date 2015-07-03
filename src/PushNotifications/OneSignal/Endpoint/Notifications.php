@@ -30,18 +30,26 @@ class Notifications extends BaseEndpoint implements EndpointInterface
             }
         }
 
-        if (empty(strip_tags($message->getTitle()))) {
-            $message->setTitle('-');
+        $title = $message->getTitle();
+        if (empty($title) || is_null($title)) {
+            $title = '-';
+        } else {
+            $title = strip_tags($title);
         }
-        if (empty(strip_tags($message->getContent()))) {
-            $message->setContent('-');
+        $content = $message->getContent();
+        if (empty($content) || is_null($content)) {
+            $content = '-';
+        } else {
+            $content = strip_tags($content);
         }
 
-        $json = array_merge([
-            'app_id' => $this->appId,
-            'headings' => ['en' => strip_tags($message->getTitle())],
-            'contents' => ['en' => strip_tags($message->getContent())],
-        ], $config);
+        $json = array_merge( [
+                'app_id'    => $this->appId,
+                'headings'  => ['en' => $title],
+                'contents'  => ['en' => $content]
+            ],
+            $config
+        );
 
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
 
@@ -58,7 +66,6 @@ class Notifications extends BaseEndpoint implements EndpointInterface
 
     public function viewAllNotifications()
     {
-        //        --header "Authorization: Basic NGEwMGZmMjItY2NkNy0xMWUzLTk5ZDUtMDAwYzI5NDBlNjJj" \
         //    https://onesignal.com/api/v1/notifications?app_id={appId}
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
 
