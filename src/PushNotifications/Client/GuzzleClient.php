@@ -52,12 +52,14 @@ class GuzzleClient extends BaseClient implements ClientInterface
      * @param array $headers
      * @param null $body
      * @param array $json
-     * @param string $formParams
+     * @param null $formParams
      * @param string $method
      *
      * @return array
+     * @throws ClientException
      * @throws HttpNotFoundException
      * @throws UnauthorizedException
+     * @throws \Exception
      */
     public function callEndpoint($endpoint, array $endpointParameters = [], array $headers = [], $body = null, array $json = [], $formParams = null, $method = HttpMethod::REQUEST_GET)
     {

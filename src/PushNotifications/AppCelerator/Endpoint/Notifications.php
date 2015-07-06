@@ -26,19 +26,25 @@ class Notifications extends BaseEndpoint implements EndpointInterface
             }
         }
 
-        if (empty(strip_tags($message->getTitle()))) {
-            $message->setTitle('-');
+        $title = $message->getTitle();
+        if (empty($title) || is_null($title)) {
+            $title = '-';
+        } else {
+            $title = strip_tags($title);
         }
-        if (empty(strip_tags($message->getContent()))) {
-            $message->setContent('-');
+        $content = $message->getContent();
+        if (empty($content) || is_null($content)) {
+            $content = '-';
+        } else {
+            $content = strip_tags($content);
         }
 
         $formParams = [
             "channel" => $config['channel'],
             "payload" => [
                 "badge"     => $config['badge'],
-                "alert"     => strip_tags($message->getContent()),
-                "title"     => strip_tags($message->getTitle()),
+                "alert"     => $content,
+                "title"     => $title,
                 "vibrate"   => $config['vibrate'],
                 "sound"     => $config['sound'],
                 "icon"      => $config['icon'],
