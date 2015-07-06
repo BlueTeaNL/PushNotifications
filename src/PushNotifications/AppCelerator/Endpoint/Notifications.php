@@ -7,6 +7,7 @@ use Bluetea\PushNotifications\Endpoint\BaseEndpoint;
 use Bluetea\PushNotifications\Endpoint\EndpointInterface;
 use Bluetea\PushNotifications\Model\MessageInterface;
 use Bluetea\PushNotifications\Request\HttpMethod;
+use GuzzleHttp\Exception\ClientException;
 
 class Notifications extends BaseEndpoint implements EndpointInterface
 {
@@ -16,7 +17,14 @@ class Notifications extends BaseEndpoint implements EndpointInterface
 
     public function createNotification(MessageInterface $message)
     {
-        $this->createLoginCookie();
+        try {
+            $this->createLoginCookie();
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error'     => $e->getResponse()->json()['meta']['message']
+            ];
+        }
 
         //https://api.cloud.appcelerator.com/v1/push_notification/notify.json?key=<APP_KEY>&pretty_json=true
         $config = $this->config;
@@ -51,38 +59,59 @@ class Notifications extends BaseEndpoint implements EndpointInterface
             ],
         ];
 
-        return $this->apiClient->callEndpoint(
-            sprintf('%s/notify.json', self::ENDPOINT),
-            ['pretty_json' => true, 'key' => $this->appId],
-            [],
-            [],
-            [],
-            $formParams,
-            HttpMethod::REQUEST_POST
-        );
+        try {
+            return $this->apiClient->callEndpoint(
+                sprintf('%s/notify.json', self::ENDPOINT),
+                ['pretty_json' => true, 'key' => $this->appId],
+                [],
+                [],
+                [],
+                $formParams,
+                HttpMethod::REQUEST_POST
+            );
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error'     => $e->getResponse()->json()['meta']['message']
+            ];
+        }
     }
 
     public function viewAllNotifications()
     {
-        $this->createLoginCookie();
+        try {
+            $this->createLoginCookie();
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error'     => $e->getResponse()->json()['meta']['message']
+            ];
+        }
 
         //https://api.cloud.appcelerator.com/v1/push_notification/count.json?key=<YOUR_APP_KEY>&pretty_json=true
-        return $this->apiClient->callEndpoint(
-            sprintf('%s/count.json', self::ENDPOINT),
-            ['pretty_json' => true, 'key' => $this->appId],
-            [],
-            [],
-            [],
-            [],
-            HttpMethod::REQUEST_GET
-        );
+        try {
+            return $this->apiClient->callEndpoint(
+                sprintf('%s/count.json', self::ENDPOINT),
+                ['pretty_json' => true, 'key' => $this->appId],
+                [],
+                [],
+                [],
+                [],
+                HttpMethod::REQUEST_GET
+            );
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error'     => $e->getResponse()->json()['meta']['message']
+            ];
+        }
     }
 
     private function createLoginCookie()
     {
         $authentication = $this->apiClient->getAuthentication();
 
-        $this->apiClient->callEndpoint(
+        return $this->apiClient->callEndpoint(
             'users/login.json',
             ['pretty_json' => true, 'key' => $this->appId, 'login' => $authentication->getUsername(), 'password' => $authentication->getPassword()],
             [],

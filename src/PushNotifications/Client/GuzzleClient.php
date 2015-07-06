@@ -63,28 +63,24 @@ class GuzzleClient extends BaseClient implements ClientInterface
      */
     public function callEndpoint($endpoint, array $endpointParameters = [], array $headers = [], $body = null, array $json = [], $formParams = null, $method = HttpMethod::REQUEST_GET)
     {
-        try {
-            // Set the endpoint
-            $this->setEndpoint($endpoint);
-            // Set the parameters
-            $this->setEndpointParameters($endpointParameters);
-            // Set the headers
-            $this->setHeaders($headers);
-            // Set form params
-            $this->setFormParams($formParams);
-            // Set the body
-            $this->setBody($body);
-            // Set the json
-            $this->setJson($json);
-            // Set the HTTP method
-            $this->setHttpMethod($method);
-            // Call the endpoint
-            $this->call();
-            // return the result
-            return $this->getResult();
-        } catch (ClientException $e) {
-            throw $e;
-        }
+        // Set the endpoint
+        $this->setEndpoint($endpoint);
+        // Set the parameters
+        $this->setEndpointParameters($endpointParameters);
+        // Set the headers
+        $this->setHeaders($headers);
+        // Set form params
+        $this->setFormParams($formParams);
+        // Set the body
+        $this->setBody($body);
+        // Set the json
+        $this->setJson($json);
+        // Set the HTTP method
+        $this->setHttpMethod($method);
+        // Call the endpoint
+        $this->call();
+        // return the result
+        return $this->getResult();
     }
 
     /**
@@ -183,21 +179,7 @@ class GuzzleClient extends BaseClient implements ClientInterface
             $request->setBody(Stream::factory($body));
         }
 
-
-        try {
-            $response = $this->getHttpClient()->send($request);
-        } catch (ClientException $e) {// Check if not found
-            if ($e->getResponse()->getStatusCode() === StatusCodes::HTTP_NOT_FOUND) {
-                throw new HttpNotFoundException();
-            }
-
-            // Check if unauthorized
-            if ($e->getResponse()->getStatusCode() === StatusCodes::HTTP_UNAUTHORIZED) {
-                throw new UnauthorizedException();
-            }
-
-            throw $e;
-        }
+        $response = $this->getHttpClient()->send($request);
 
         $this->setHttpStatusCode($response->getStatusCode());
 

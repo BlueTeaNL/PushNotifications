@@ -7,6 +7,7 @@ use Bluetea\PushNotifications\Endpoint\BaseEndpoint;
 use Bluetea\PushNotifications\Endpoint\EndpointInterface;
 use Bluetea\PushNotifications\Model\MessageInterface;
 use Bluetea\PushNotifications\Request\HttpMethod;
+use GuzzleHttp\Exception\ClientException;
 
 class Notifications extends BaseEndpoint implements EndpointInterface
 {
@@ -44,39 +45,58 @@ class Notifications extends BaseEndpoint implements EndpointInterface
         }
 
         $json = array_merge( [
-                'app_id'    => $this->appId,
-                'headings'  => ['en' => $title],
-                'contents'  => ['en' => $content]
-            ],
+            'app_id'    => $this->appId,
+            'headings'  => ['en' => $title],
+            'contents'  => ['en' => $content]
+        ],
             $config
         );
 
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
 
-        return $this->apiClient->callEndpoint(
-            self::ENDPOINT,
-            [],
-            $headers,
-            [],
-            $json,
-            [],
-            HttpMethod::REQUEST_POST
-        );
+        try {
+            $this->apiClient->callEndpoint(
+                self::ENDPOINT,
+                [],
+                $headers,
+                [],
+                $json,
+                [],
+                HttpMethod::REQUEST_POST
+            );
+
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error' => $e->getResponse()->json()['errors'][0]
+            ];
+        }
+
+        return null;
     }
 
     public function viewAllNotifications()
     {
-        //    https://onesignal.com/api/v1/notifications?app_id={appId}
+        //https://onesignal.com/api/v1/notifications?app_id={appId}
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
 
-        return $this->apiClient->callEndpoint(
-            self::ENDPOINT,
-            ['app_id' => $this->appId],
-            $headers,
-            [],
-            [],
-            [],
-            HttpMethod::REQUEST_GET
-        );
+        try {
+            $this->apiClient->callEndpoint(
+                self::ENDPOINT,
+                ['app_id' => $this->appId],
+                $headers,
+                [],
+                [],
+                [],
+                HttpMethod::REQUEST_GET
+            );
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error' => $e->getResponse()->json()['errors'][0]
+            ];
+        }
+
+        return null;
     }
 }
