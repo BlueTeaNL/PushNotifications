@@ -183,11 +183,7 @@ class GuzzleClient extends BaseClient implements ClientInterface
 
         $this->setHttpStatusCode($response->getStatusCode());
 
-        if ($this->getAccept() == 'application/json') {
-            $this->setData($response->json());
-        } else {
-            $this->setData($response->getBody(true));
-        }
+        $this->setData($response->json());
     }
 
     /**

@@ -21,6 +21,12 @@ class Notifications extends BaseEndpoint implements EndpointInterface
         $this->restApiKey = $restApiKey;
     }
 
+    public function setKeys($appId, $restApiKey)
+    {
+        $this->appId = $appId;
+        $this->restApiKey = $restApiKey;
+    }
+
     public function createNotification(MessageInterface $message)
     {
         //https://onesignal.com/api/v1/notifications
@@ -29,6 +35,10 @@ class Notifications extends BaseEndpoint implements EndpointInterface
             foreach ($message->getOptions() as $key => $option) {
                 $config[$key] = $option;
             }
+        }
+
+        if(!isset($config['include_player_ids']) && (empty($config['included_segments'])) && ((!isset($config['tags'])))) {
+            $config['included_segments'] = ['All'];
         }
 
         $title = $message->getTitle();
@@ -53,9 +63,8 @@ class Notifications extends BaseEndpoint implements EndpointInterface
         );
 
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
-
         try {
-            $this->apiClient->callEndpoint(
+            return $this->apiClient->callEndpoint(
                 self::ENDPOINT,
                 [],
                 $headers,
@@ -71,18 +80,48 @@ class Notifications extends BaseEndpoint implements EndpointInterface
                 'error' => $e->getResponse()->json()['errors'][0]
             ];
         }
-
-        return null;
     }
 
-    public function viewAllNotifications()
+    public function viewAllNotifications($limit = 50, $offset = 0)
     {
-        //https://onesignal.com/api/v1/notifications?app_id={appId}
+        //https://onesignal.com/api/v1/notifications?app_id={appId}&limit={limit}&offset={offset}
         $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
 
+        if (!is_int($limit) || $limit > 50 || $limit < 1) {
+            $limit = 50;
+        }
+        if (!is_int($offset) || $offset < 1) {
+            $offset = 0;
+        }
+
         try {
-            $this->apiClient->callEndpoint(
+            return $this->apiClient->callEndpoint(
                 self::ENDPOINT,
+                ['app_id' => $this->appId,
+                 'limit'  => $limit,
+                 'offset' => $offset
+                ],
+                $headers,
+                [],
+                [],
+                [],
+                HttpMethod::REQUEST_GET
+            );
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error' => $e->getResponse()->json()['errors'][0]
+            ];
+        }
+    }
+
+    public function viewNotification($id)
+    {
+        //https://onesignal.com/api/v1/notifications/:id?app_id={appId}
+        $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
+        try {
+            return $this->apiClient->callEndpoint(
+                sprintf('%s/%s', self::ENDPOINT, $id),
                 ['app_id' => $this->appId],
                 $headers,
                 [],
@@ -96,7 +135,27 @@ class Notifications extends BaseEndpoint implements EndpointInterface
                 'error' => $e->getResponse()->json()['errors'][0]
             ];
         }
+    }
 
-        return null;
+    public function cancelNotification($id)
+    {
+        //https://onesignal.com/api/v1/notifications/:id?app_id={appId}
+        $headers = ['Authorization' => sprintf('Basic %s', $this->restApiKey)];
+        try {
+            return $this->apiClient->callEndpoint(
+                sprintf('%s/%s', self::ENDPOINT, $id),
+                ['app_id' => $this->appId],
+                $headers,
+                [],
+                [],
+                [],
+                HttpMethod::REQUEST_DELETE
+            );
+        } catch (ClientException $e) {
+            return [
+                'returnMsg' => $e->getMessage(),
+                'error' => $e->getResponse()->json()['errors'][0]
+            ];
+        }
     }
 }
