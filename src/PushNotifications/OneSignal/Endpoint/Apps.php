@@ -15,7 +15,7 @@ class Apps extends BaseEndpoint implements EndpointInterface
 
     protected $oneSignalUserAuthKey;
 
-    function __construct(ClientInterface $apiClient, $appId, $oneSignalUserAuthKey, $config)
+    function __construct(ClientInterface $apiClient, $appId, $restApiKey, $oneSignalUserAuthKey, $config)
     {
         parent::__construct($apiClient, $appId, $config);
         $this->oneSignalUserAuthKey = $oneSignalUserAuthKey;

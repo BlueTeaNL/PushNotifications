@@ -15,7 +15,7 @@ class Notifications extends BaseEndpoint implements EndpointInterface
 
     protected $restApiKey;
 
-    function __construct(ClientInterface $apiClient, $appId, $restApiKey, $config)
+    function __construct(ClientInterface $apiClient, $appId, $restApiKey, $oneSignalUserAuthKey, $config)
     {
         parent::__construct($apiClient, $appId, $config);
         $this->restApiKey = $restApiKey;
